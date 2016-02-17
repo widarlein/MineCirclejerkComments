@@ -30,16 +30,20 @@ class CirclejerkMiner {
         def commentCount = 0
         def after = null
         while (commentCount < commentNumber) {
-            def comments = getComments(after)
+            def commentsJson = getComments(after)
+            def comments = commentsJson.data.children
             println comments.size()
             for (comment in comments) {
+                try {
                 def jobName = appendComment(comment.data.body)
                 println jobName
+                } catch (all) {println "Exception $all"}
                 commentCount++
                 if (commentCount == commentNumber) {
                     break
                 }
             }
+            after = commentsJson.data.after
 
         }
         println "Stopping mining after $commentCount comments"
@@ -54,7 +58,7 @@ class CirclejerkMiner {
             }
 
             response.success = { resp, json ->
-                return json.data.children
+                return json
             }
 
         }
@@ -75,6 +79,9 @@ class CirclejerkMiner {
                 return json.jobName
             }
 
+            response.failure = { resp ->
+                println resp
+            }
         }
     }
 
